@@ -84,8 +84,15 @@ class AFDB(object):
         # Save signals to file
         if not os.path.exists(self.processed_path):
             os.mkdir(self.processed_path)
+        max_bytes = 2**31 - 1
+
+        # x_train file too large, have to use this trick
+        # https://stackoverflow.com/questions/31468117/python-3-can-pickle-handle-byte-objects-larger-than-4gb
+        bytes_out = pickle.dumps(train_data_n)
         with open(os.path.join(self.processed_path, 'x_train.pkl'), 'wb') as f:
-            pickle.dump(train_data_n, f)
+            for idx in range(0, len(bytes_out), max_bytes):
+                f.write(bytes_out[idx:idx+max_bytes])
+#             pickle.dump(train_data_n, f)
         with open(os.path.join(self.processed_path, 'x_test.pkl'), 'wb') as f:
             pickle.dump(test_data_n, f)
         with open(os.path.join(self.processed_path, 'state_train.pkl'), 'wb') as f:

@@ -1,5 +1,5 @@
 import numpy as np
-import TimeSynth.timesynth as ts
+import timesynth as ts
 import matplotlib.pyplot as plt
 import seaborn as sns; sns.set()
 

@@ -144,8 +144,9 @@ def epoch_run(loader, disc_model, encoder, device, w=0, optimizer=None, train=Tr
         x_t = np.repeat(x_t, mc_sample, axis=0)
         neighbors = torch.ones((len(x_p))).to(device)
         non_neighbors = torch.zeros((len(x_n))).to(device)
-        x_t, x_p, x_n = x_t.to(device), x_p.to(device), x_n.to(device)
-
+        x_t = x_t.to(device)
+        x_p = x_p.to(device)
+        x_n = x_n.to(device)
         z_t = encoder(x_t)
         z_p = encoder(x_p)
         z_n = encoder(x_n)
@@ -199,18 +200,23 @@ def learn_encoder(x, encoder, window_size, w, lr=0.001, decay=0.005, mc_sample_s
         performance = []
         best_acc = 0
         best_loss = np.inf
-
         for epoch in range(n_epochs+1):
+#             print("Epoch", epoch)
+#             print("Preparing trainset")
             trainset = TNCDataset(x=torch.Tensor(x[:n_train]), mc_sample_size=mc_sample_size,
                                   window_size=window_size, augmentation=augmentation, adf=True)
-            train_loader = data.DataLoader(trainset, batch_size=batch_size, shuffle=True, num_workers=3)
+#             print("Preparing trainloader")
+            train_loader = data.DataLoader(trainset, batch_size=batch_size, shuffle=True) # why use num_workers=3???
+#             print("Preparing validset")
             validset = TNCDataset(x=torch.Tensor(x[n_train:]), mc_sample_size=mc_sample_size,
                                   window_size=window_size, augmentation=augmentation, adf=True)
+#             print("Preparing validloader")
             valid_loader = data.DataLoader(validset, batch_size=batch_size, shuffle=True)
-
+#             print("Running epoch")
             epoch_loss, epoch_acc = epoch_run(train_loader, disc_model, encoder, optimizer=optimizer,
                                               w=w, train=True, device=device)
             test_loss, test_acc = epoch_run(valid_loader, disc_model, encoder, train=False, w=w, device=device)
+#             print("Do some other stuff")
             performance.append((epoch_loss, test_loss, epoch_acc, test_acc))
             if epoch%10 == 0:
                 print('(cv:%s)Epoch %d Loss =====> Training Loss: %.5f \t Training Accuracy: %.5f \t Test Loss: %.5f \t Test Accuracy: %.5f'
@@ -224,7 +230,8 @@ def learn_encoder(x, encoder, window_size, w, lr=0.001, decay=0.005, mc_sample_s
                     'discriminator_state_dict': disc_model.state_dict(),
                     'best_accuracy': test_acc
                 }
-                torch.save(state, './ckpt/%s/checkpoint_%d.pth.tar'%(path,cv))
+                torch.save(state, './ckpt/%s/checkpoint_%d.pth.tar'%(path,cv)) # passed thru on first run
+#             print("Epoch ends")
         accuracies.append(best_acc)
         losses.append(best_loss)
         # Save performance plots
@@ -295,13 +302,25 @@ def main(is_train, data_type, cv, w, cont):
         encoder = WFEncoder(encoding_size=64).to(device)
 
         if is_train:
-            with open(os.path.join(path, 'x_train.pkl'), 'rb') as f:
-                x = pickle.load(f)
+#             print("Started training!")
+            # because x_train is too large
+            max_bytes = 2 ** 31 - 1
+            bytes_in = bytearray(0)
+            file_path = os.path.join(path, 'x_train.pkl')
+            input_size = os.path.getsize(file_path)
+            with open(file_path, 'rb') as f_in:
+                for _ in range(0, input_size, max_bytes):
+                    bytes_in += f_in.read(max_bytes)
+            x = pickle.loads(bytes_in)
+
+#             with open(os.path.join(path, 'x_train.pkl'), 'rb') as f:
+#                 x = pickle.load(f)
+
             T = x.shape[-1]
             x_window = np.concatenate(np.split(x[:, :, :T // 5 * 5], 5, -1), 0)
             learn_encoder(torch.Tensor(x_window), encoder, w=w, lr=1e-5, decay=1e-4, n_epochs=150, window_size=window_size,
                           path='waveform', mc_sample_size=10, device=device, augmentation=7, n_cross_val=cv, cont = cont)
-
+#             print("Finished training!")
         else:
             with open(os.path.join(path, 'x_test.pkl'), 'rb') as f:
                 x_test = pickle.load(f)

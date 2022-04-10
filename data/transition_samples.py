@@ -4,7 +4,7 @@ The transtion is from one narma model to another and the parameters gradually ch
 """
 
 import numpy as np
-import TimeSynth.timesynth as ts
+import timesynth as ts
 import matplotlib.pyplot as plt
 import pickle
 import os
