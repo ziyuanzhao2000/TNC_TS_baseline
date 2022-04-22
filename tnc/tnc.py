@@ -178,6 +178,9 @@ def learn_encoder(x, encoder, window_size, w, lr=0.001, decay=0.005, mc_sample_s
         if 'waveform' in path:
             encoder = WFEncoder(encoding_size=64).to(device)
             batch_size = 5
+        elif 'physionet2017' in path:
+            encoder = WFEncoder(encoding_size=64).to(device)
+            batch_size = 128
         elif 'simulation' in path:
             encoder = RnnEncoder(hidden_size=100, in_channel=3, encoding_size=10, device=device)
             batch_size = 10

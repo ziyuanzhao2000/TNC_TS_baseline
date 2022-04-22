@@ -62,6 +62,8 @@ class AFDB(object):
         # Get list of recordings
         self.record_ids = [file.split('.')[0] for file in os.listdir(self.raw_path) if '.dat' in file]
 
+    # X is of dimension n_samples x n_channels x window_size
+    # y is of dimension n_samples x window_size
     def generate_processed_db(self):
         """Generate the processed version of the MIT-BIH Atrial Fibrillation database in the 'processed' folder."""
         print('Generating Processed MIT-BIH Atrial Fibrillation Database ...')
@@ -70,7 +72,6 @@ class AFDB(object):
         signal_lens = [len(sig) for sig in all_labels]
         all_signals = np.array([sig[:,:min(signal_lens)] for sig in all_signals])
         all_labels = np.array([sig[:min(signal_lens)] for sig in all_labels])
-
         n_train = int(0.8*len(all_signals))
         train_data = all_signals[:n_train]
         test_data = all_signals[n_train:]
