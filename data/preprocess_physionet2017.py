@@ -52,11 +52,13 @@ def split_signal(X, y):
     y = np.array([el for sublst in y_replicated for el in sublst])
     y = np.expand_dims(y, axis=1)
     y = np.repeat(y, repeats=window_len, axis=1)
-    print(X.shape, y.shape)
     return X, y
 
 X_train, y_train = get_X_y(aliases['train'])
 X_test, y_test = get_X_y(aliases['test'])
+
+X_train, y_train = split_signal(X_train, y_train)
+X_test, y_test = split_signal(X_test, y_test)
 
 # assumes we run script from the inner data folder
 output_dir = os.path.join(os.getcwd(), 'physionet2017', 'processed')
