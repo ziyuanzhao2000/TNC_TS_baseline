@@ -371,7 +371,7 @@ def main(is_train, data_type, cv, w, cont):
                     print('TNC acc: %.2f \t TNC auc: %.2f \t E2E acc: %.2f \t E2E auc: %.2f'%(tnc_acc, tnc_auc, e2e_acc, e2e_auc))
 
     elif data_type == 'physionet2017':
-        window_size = 1500
+        window_size = 30
         path = './data/physionet2017/processed'
         encoder = WFEncoder(encoding_size=64).to(device)
 

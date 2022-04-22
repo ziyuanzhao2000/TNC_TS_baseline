@@ -140,7 +140,7 @@ class WFEncoder(nn.Module):
                 nn.init.xavier_uniform_(self.classifier[1].weight)
 
         self.features = nn.Sequential(
-            nn.Conv1d(2, 64, kernel_size=4, stride=1, padding=1),
+            nn.Conv1d(1, 64, kernel_size=4, stride=1, padding=1), # use two channels for afib, one channel for p17.
             nn.ELU(inplace=True),
             nn.BatchNorm1d(64, eps=0.001),
             nn.Conv1d(64, 64, kernel_size=3, stride=1, padding=1),

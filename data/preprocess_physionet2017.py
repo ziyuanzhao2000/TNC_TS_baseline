@@ -15,7 +15,7 @@ label_map = {'N':0, 'A':1, 'O':2, '~':3}
 
 signal_min = float('inf')
 signal_max = float('-inf')
-
+signal_lens = []
 # read training and testing datasets into two lists
 def get_X_y(alias):
     global signal_min, signal_max
@@ -38,27 +38,27 @@ def get_X_y(alias):
         signal_max = max(signal_max, signal.max())
         X.append(signal)
         y.append(label_map[diagnosis])
+        signal_lens.append(len(signal))
     return X, y
 
 # returns X of dimension: n_samples x n_channels x window_len
 #         y ...         : n_samples x window_len
-def split_signal(X, y):
-    X_len = [arr.shape[0] // window_len for arr in X]
-    X = [arr[:arr_len * window_len].reshape((arr_len, window_len)) for (arr, arr_len) in zip(X, X_len)]
-    X = np.vstack(tuple(X))
+# Makes all patient's signal of same length, equal to the shortest one
+def cut_signal(X, y):
+    min_len = min(signal_lens)
+    X = np.array([arr[:min_len] for arr in X])
+    X = np.swapaxes(X, 1, 2)
     X = (X - 0) / (signal_max - signal_min) # normalize
-    X = np.expand_dims(X, axis=1) # equivalently, unsqueeze
-    y_replicated = [[label] * n for (n, label) in tqdm(zip(X_len, y))]
-    y = np.array([el for sublst in y_replicated for el in sublst])
-    y = np.expand_dims(y, axis=1)
-    y = np.repeat(y, repeats=window_len, axis=1)
+    y = np.expand_dims(np.array(y), axis=1)
+    y = np.repeat(y, repeats=min_len, axis=1)
+    print(X.shape, y.shape)
     return X, y
 
 X_train, y_train = get_X_y(aliases['train'])
 X_test, y_test = get_X_y(aliases['test'])
 
-X_train, y_train = split_signal(X_train, y_train)
-X_test, y_test = split_signal(X_test, y_test)
+X_train, y_train = cut_signal(X_train, y_train)
+X_test, y_test = cut_signal(X_test, y_test)
 
 # assumes we run script from the inner data folder
 output_dir = os.path.join(os.getcwd(), 'physionet2017', 'processed')
