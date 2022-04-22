@@ -206,21 +206,23 @@ def run_test(data, e2e_lr, tnc_lr, cpc_lr, trip_lr, data_path, window_size, n_cr
             tnc_classifier = WFClassifier(encoding_size=encoding_size, output_size=4)
             tnc_model = torch.nn.Sequential(tnc_encoder, tnc_classifier).to(device)
 
-            cpc_encoder = WFEncoder(encoding_size=encoding_size).to(device)
-            if not os.path.exists('./ckpt/waveform_cpc/checkpoint_%d.pth.tar'%cv):
-                RuntimeError('Checkpoint for CPC encoder does not exist!')
-            cpc_checkpoint = torch.load('./ckpt/waveform_cpc/checkpoint_%d.pth.tar'%cv)
-            cpc_encoder.load_state_dict(cpc_checkpoint['encoder_state_dict'])
-            cpc_classifier = WFClassifier(encoding_size=encoding_size, output_size=4)
-            cpc_model = torch.nn.Sequential(cpc_encoder, cpc_classifier).to(device)
+#           I just care about using TNC encoder which is the core of their paper!!
 
-            trip_encoder = WFEncoder(encoding_size=encoding_size).to(device)
-            if not os.path.exists('./ckpt/waveform_trip/checkpoint_%d.pth.tar'%cv):
-                RuntimeError('Checkpoint for Triplet Loss encoder does not exist!')
-            trip_checkpoint = torch.load('./ckpt/waveform_trip/checkpoint_%d.pth.tar'%cv)
-            trip_encoder.load_state_dict(trip_checkpoint['encoder_state_dict'])
-            trip_classifier = WFClassifier(encoding_size=encoding_size, output_size=4)
-            trip_model = torch.nn.Sequential(trip_encoder, trip_classifier).to(device)
+#             cpc_encoder = WFEncoder(encoding_size=encoding_size).to(device)
+#             if not os.path.exists('./ckpt/waveform_cpc/checkpoint_%d.pth.tar'%cv):
+#                 RuntimeError('Checkpoint for CPC encoder does not exist!')
+#             cpc_checkpoint = torch.load('./ckpt/waveform_cpc/checkpoint_%d.pth.tar'%cv)
+#             cpc_encoder.load_state_dict(cpc_checkpoint['encoder_state_dict'])
+#             cpc_classifier = WFClassifier(encoding_size=encoding_size, output_size=4)
+#             cpc_model = torch.nn.Sequential(cpc_encoder, cpc_classifier).to(device)
+#
+#             trip_encoder = WFEncoder(encoding_size=encoding_size).to(device)
+#             if not os.path.exists('./ckpt/waveform_trip/checkpoint_%d.pth.tar'%cv):
+#                 RuntimeError('Checkpoint for Triplet Loss encoder does not exist!')
+#             trip_checkpoint = torch.load('./ckpt/waveform_trip/checkpoint_%d.pth.tar'%cv)
+#             trip_encoder.load_state_dict(trip_checkpoint['encoder_state_dict'])
+#             trip_classifier = WFClassifier(encoding_size=encoding_size, output_size=4)
+#             trip_model = torch.nn.Sequential(trip_encoder, trip_classifier).to(device)
             n_epochs = 8
             n_epoch_e2e = 8
 
