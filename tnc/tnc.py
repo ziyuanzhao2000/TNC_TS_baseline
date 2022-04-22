@@ -299,7 +299,7 @@ def main(is_train, data_type, cv, w, cont):
                     tnc_acc, tnc_auc, e2e_acc, e2e_auc = exp.run(data='simulation', n_epochs=150, lr_e2e=lr, lr_cls=lr)
                     print('TNC acc: %.2f \t TNC auc: %.2f \t E2E acc: %.2f \t E2E auc: %.2f'%(tnc_acc, tnc_auc, e2e_acc, e2e_auc))
 
-    if data_type == 'waveform':
+    elif data_type == 'waveform':
         window_size = 2500
         path = './data/waveform_data/processed'
         encoder = WFEncoder(encoding_size=64).to(device)
@@ -321,7 +321,7 @@ def main(is_train, data_type, cv, w, cont):
 
             T = x.shape[-1]
             x_window = np.concatenate(np.split(x[:, :, :T // 5 * 5], 5, -1), 0)
-            learn_encoder(torch.Tensor(x_window), encoder, w=w, lr=1e-5, decay=1e-4, n_epochs=150, window_size=window_size,
+            learn_encoder(torch.Tensor(x_window), encoder, w=w, lr=1e-5, decay=1e-4, n_epochs=50, window_size=window_size,
                           path='waveform', mc_sample_size=10, device=device, augmentation=7, n_cross_val=cv, cont = cont)
 #             print("Finished training!")
         else:
@@ -339,7 +339,7 @@ def main(is_train, data_type, cv, w, cont):
             exp = WFClassificationExperiment(window_size=window_size, cv=cv_ind)
             exp.run(data='waveform', n_epochs=10, lr_e2e=0.0001, lr_cls=0.01)
 
-    if data_type == 'har':
+    elif data_type == 'har':
         window_size = 4
         path = './data/HAR_data/'
         encoder = RnnEncoder(hidden_size=100, in_channel=561, encoding_size=10, device=device)
@@ -369,6 +369,46 @@ def main(is_train, data_type, cv, w, cont):
                     print('===> lr: ', lr)
                     tnc_acc, tnc_auc, e2e_acc, e2e_auc = exp.run(data='har', n_epochs=50, lr_e2e=lr, lr_cls=lr)
                     print('TNC acc: %.2f \t TNC auc: %.2f \t E2E acc: %.2f \t E2E auc: %.2f'%(tnc_acc, tnc_auc, e2e_acc, e2e_auc))
+
+    elif data_type == 'physionet2017':
+        window_size = 1500
+        path = './data/physionet2017/processed'
+        encoder = WFEncoder(encoding_size=64).to(device)
+
+        if is_train:
+            print("Started training!")
+            # because x_train is too large
+            max_bytes = 2 ** 31 - 1
+            bytes_in = bytearray(0)
+            file_path = os.path.join(path, 'x_train.pkl')
+            input_size = os.path.getsize(file_path)
+            with open(file_path, 'rb') as f_in:
+                for _ in range(0, input_size, max_bytes):
+                    bytes_in += f_in.read(max_bytes)
+            x = pickle.loads(bytes_in)
+
+#             with open(os.path.join(path, 'x_train.pkl'), 'rb') as f:
+#                 x = pickle.load(f)
+
+            T = x.shape[-1]
+            x_window = np.concatenate(np.split(x[:, :, :T // 5 * 5], 5, -1), 0)
+            learn_encoder(torch.Tensor(x_window), encoder, w=w, lr=1e-5, decay=1e-4, n_epochs=50, window_size=window_size,
+                          path='physionet2017', mc_sample_size=10, device=device, augmentation=7, n_cross_val=cv, cont = cont)
+            print("Finished training!")
+        else:
+            with open(os.path.join(path, 'x_test.pkl'), 'rb') as f:
+                x_test = pickle.load(f)
+            with open(os.path.join(path, 'state_test.pkl'), 'rb') as f:
+                y_test = pickle.load(f)
+            checkpoint = torch.load('./ckpt/%s/checkpoint_0.pth.tar' % (data_type))
+            encoder.load_state_dict(checkpoint['encoder_state_dict'])
+            encoder = encoder.to(device)
+            track_encoding(x_test[0, :, 80000:130000], y_test[0, 80000:130000], encoder, window_size, 'physionet2017', sliding_gap=1000)
+            for cv_ind in range(cv):
+                plot_distribution(x_test, y_test, encoder, window_size=window_size, path='physionet2017',
+                                  device=device, augment=100, cv=cv_ind, title='TNC')
+            exp = WFClassificationExperiment(window_size=window_size, cv=cv_ind)
+            exp.run(data='physionet2017', n_epochs=10, lr_e2e=0.0001, lr_cls=0.01)
 
 
 if __name__ == '__main__':
