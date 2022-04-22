@@ -168,7 +168,7 @@ class WFEncoder(nn.Module):
 
         self.fc = nn.Sequential(
             nn.Dropout(0.5),
-            nn.Linear(79872, 2048),
+            nn.Linear(768, 2048), # 79782 for afib, 768 for p17.
             nn.ELU(inplace=True),
             nn.BatchNorm1d(2048, eps=0.001),
             nn.Linear(2048, self.encoding_size)
