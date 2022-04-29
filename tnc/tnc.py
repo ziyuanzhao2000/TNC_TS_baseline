@@ -172,7 +172,7 @@ def epoch_run(loader, disc_model, encoder, device, w=0, optimizer=None, train=Tr
 
 
 def learn_encoder(x, encoder, window_size, w, lr=0.001, decay=0.005, mc_sample_size=20,
-                  n_epochs=100, path='simulation', device='cpu', augmentation=1, n_cross_val=1, cont=False):
+                  n_epochs=100, path='simulation', device='cuda', augmentation=1, n_cross_val=1, cont=False):
     accuracies, losses = [], []
     for cv in range(n_cross_val):
         if 'waveform' in path:
@@ -204,22 +204,22 @@ def learn_encoder(x, encoder, window_size, w, lr=0.001, decay=0.005, mc_sample_s
         best_acc = 0
         best_loss = np.inf
         for epoch in range(n_epochs+1):
-#             print("Epoch", epoch)
-#             print("Preparing trainset")
+            print("Epoch", epoch)
+            print("Preparing trainset")
             trainset = TNCDataset(x=torch.Tensor(x[:n_train]), mc_sample_size=mc_sample_size,
                                   window_size=window_size, augmentation=augmentation, adf=True)
-#             print("Preparing trainloader")
+            print("Preparing trainloader")
             train_loader = data.DataLoader(trainset, batch_size=batch_size, shuffle=True) # why use num_workers=3???
-#             print("Preparing validset")
+            print("Preparing validset")
             validset = TNCDataset(x=torch.Tensor(x[n_train:]), mc_sample_size=mc_sample_size,
                                   window_size=window_size, augmentation=augmentation, adf=True)
-#             print("Preparing validloader")
+            print("Preparing validloader")
             valid_loader = data.DataLoader(validset, batch_size=batch_size, shuffle=True)
-#             print("Running epoch")
+            print("Running epoch")
             epoch_loss, epoch_acc = epoch_run(train_loader, disc_model, encoder, optimizer=optimizer,
                                               w=w, train=True, device=device)
             test_loss, test_acc = epoch_run(valid_loader, disc_model, encoder, train=False, w=w, device=device)
-#             print("Do some other stuff")
+            print("Do some other stuff")
             performance.append((epoch_loss, test_loss, epoch_acc, test_acc))
             if epoch%10 == 0:
                 print('(cv:%s)Epoch %d Loss =====> Training Loss: %.5f \t Training Accuracy: %.5f \t Test Loss: %.5f \t Test Accuracy: %.5f'
@@ -234,7 +234,7 @@ def learn_encoder(x, encoder, window_size, w, lr=0.001, decay=0.005, mc_sample_s
                     'best_accuracy': test_acc
                 }
                 torch.save(state, './ckpt/%s/checkpoint_%d.pth.tar'%(path,cv)) # passed thru on first run
-#             print("Epoch ends")
+            print("Epoch ends")
         accuracies.append(best_acc)
         losses.append(best_loss)
         # Save performance plots
@@ -387,9 +387,6 @@ def main(is_train, data_type, cv, w, cont):
                     bytes_in += f_in.read(max_bytes)
             x = pickle.loads(bytes_in)
 
-#             with open(os.path.join(path, 'x_train.pkl'), 'rb') as f:
-#                 x = pickle.load(f)
-
             T = x.shape[-1]
             x_window = np.concatenate(np.split(x[:, :, :T // 5 * 5], 5, -1), 0)
             learn_encoder(torch.Tensor(x_window), encoder, w=w, lr=1e-5, decay=1e-4, n_epochs=50, window_size=window_size,
@@ -403,15 +400,16 @@ def main(is_train, data_type, cv, w, cont):
             checkpoint = torch.load('./ckpt/%s/checkpoint_0.pth.tar' % (data_type))
             encoder.load_state_dict(checkpoint['encoder_state_dict'])
             encoder = encoder.to(device)
-            track_encoding(x_test[0, :, 80000:130000], y_test[0, 80000:130000], encoder, window_size, 'physionet2017', sliding_gap=1000)
-            for cv_ind in range(cv):
-                plot_distribution(x_test, y_test, encoder, window_size=window_size, path='physionet2017',
-                                  device=device, augment=100, cv=cv_ind, title='TNC')
+            #track_encoding(x_test[0, :, 80000:130000], y_test[0, 80000:130000], encoder, window_size, 'physionet2017', sliding_gap=1000)
+            #for cv_ind in range(cv):
+            #    plot_distribution(x_test, y_test, encoder, window_size=window_size, path='physionet2017',
+            #                      device=device, augment=100, cv=cv_ind, title='TNC')
             exp = WFClassificationExperiment(window_size=window_size, cv=cv_ind)
             exp.run(data='physionet2017', n_epochs=10, lr_e2e=0.0001, lr_cls=0.01)
 
 
 if __name__ == '__main__':
+    print('running on', device)
     random.seed(1234)
     parser = argparse.ArgumentParser(description='Run TNC')
     parser.add_argument('--data', type=str, default='simulation')
