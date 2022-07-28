@@ -339,7 +339,7 @@ def main(is_train, data_type, cv, w, cont):
             exp = WFClassificationExperiment(window_size=window_size, cv=cv_ind)
             exp.run(data='waveform', n_epochs=10, lr_e2e=0.0001, lr_cls=0.01)
 
-    elif data_type == 'har':
+    elif data_type == 'har': # Ziyuan: we modify this condition for the additional baseline
         window_size = 4
         path = './data/HAR_data/'
         encoder = RnnEncoder(hidden_size=100, in_channel=9, encoding_size=10, device=device) #561 -> 9
@@ -358,12 +358,12 @@ def main(is_train, data_type, cv, w, cont):
             checkpoint = torch.load('./ckpt/%s/checkpoint_0.pth.tar' % (data_type))
             encoder.load_state_dict(checkpoint['encoder_state_dict'])
             encoder = encoder.to(device)
-            track_encoding(x_test[0,:,:], y_test[0,:], encoder, window_size, 'har')
+#             track_encoding(x_test[0,:,:], y_test[0,:], encoder, window_size, 'har')
             for cv_ind in range(cv):
-                plot_distribution(x_test, y_test, encoder, window_size=window_size, path='har', device=device,
-                                  augment=100, cv=cv_ind, title='TNC')
-                exp = ClassificationPerformanceExperiment(n_states=6, encoding_size=10, path='har', hidden_size=100,
-                                                          in_channel=9, window_size=4, cv=cv_ind)
+#                 plot_distribution(x_test, y_test, encoder, window_size=window_size, path='har', device=device,
+#                                   augment=100, cv=cv_ind, title='TNC')
+                exp = ClassificationPerformanceExperiment(n_states=8, encoding_size=10, path='har', hidden_size=100,
+                                                          in_channel=3, window_size=4, cv=cv_ind)
                 # Run cross validation for classification
                 for lr in [0.001, 0.01, 0.1]:
                     print('===> lr: ', lr)
