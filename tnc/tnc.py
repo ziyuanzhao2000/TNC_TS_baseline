@@ -347,7 +347,7 @@ def main(is_train, data_type, cv, w, cont):
         if is_train:
             with open(os.path.join(path, 'x_train.pkl'), 'rb') as f:
                 x = pickle.load(f)
-            learn_encoder(torch.Tensor(x), encoder, w=w, lr=1e-3, decay=1e-5, n_epochs=150, window_size=window_size,
+            learn_encoder(torch.Tensor(x), encoder, w=w, lr=1e-3, decay=1e-5, n_epochs=15, window_size=window_size,
                           path='har', mc_sample_size=20, device=device, augmentation=5, n_cross_val=cv)
 
         else:
