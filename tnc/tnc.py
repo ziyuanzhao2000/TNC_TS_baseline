@@ -342,7 +342,7 @@ def main(is_train, data_type, cv, w, cont):
     elif data_type == 'har': # Ziyuan: we modify this condition for the additional baseline
         window_size = 4
         path = './data/HAR_data/'
-        encoder = RnnEncoder(hidden_size=100, in_channel=9, encoding_size=10, device=device) #561 -> 9
+        encoder = RnnEncoder(hidden_size=100, in_channel=3, encoding_size=10, device=device) #561 -> 9
 
         if is_train:
             with open(os.path.join(path, 'x_train.pkl'), 'rb') as f:
