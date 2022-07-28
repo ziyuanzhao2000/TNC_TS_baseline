@@ -185,7 +185,7 @@ def learn_encoder(x, encoder, window_size, w, lr=0.001, decay=0.005, mc_sample_s
             encoder = RnnEncoder(hidden_size=100, in_channel=3, encoding_size=10, device=device)
             batch_size = 10
         elif 'har' in path:
-            encoder = RnnEncoder(hidden_size=100, in_channel=9, encoding_size=10, device=device)
+            encoder = RnnEncoder(hidden_size=100, in_channel=3, encoding_size=10, device=device)
             batch_size = 10
         if not os.path.exists('./ckpt/%s'%path):
             os.mkdir('./ckpt/%s'%path)
