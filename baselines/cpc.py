@@ -187,15 +187,16 @@ def main(is_train, data_type, lr,  cv):
                 y_test = pickle.load(f)
 
             for cv_ind in range(cv):
-                plot_distribution(x_test, y_test, encoder, window_size=window_size, path='har_cpc',
-                                  device=device, augment=100, cv=cv_ind, title='CPC')
+#                 plot_distribution(x_test, y_test, encoder, window_size=window_size, path='har_cpc',
+#                                   device=device, augment=100, cv=cv_ind, title='CPC')
+                print("running experiment", str(cv))
                 exp = ClassificationPerformanceExperiment(n_states=8, encoding_size=10, path='har_cpc', hidden_size=100,
                                                         in_channel=3, window_size=4, cv=cv_ind)
                 # Run cross validation for classification
-                for lr in [0.001, 0.01, 0.1]:
-                    print('===> lr: ', lr)
-                    tnc_acc, tnc_auc, e2e_acc, e2e_auc = exp.run(data='har', n_epochs=50, lr_e2e=lr, lr_cls=lr)
-                    print('TNC acc: %.2f \t TNC auc: %.2f \t E2E acc: %.2f \t E2E auc: %.2f'%(tnc_acc, tnc_auc, e2e_acc, e2e_auc))
+#                 for lr in [0.001, 0.01, 0.1]:
+#                     print('===> lr: ', lr)
+#                     tnc_acc, tnc_auc, e2e_acc, e2e_auc = exp.run(data='har', n_epochs=50, lr_e2e=lr, lr_cls=lr)
+#                     print('TNC acc: %.2f \t TNC auc: %.2f \t E2E acc: %.2f \t E2E auc: %.2f'%(tnc_acc, tnc_auc, e2e_acc, e2e_auc))
 
 
 if __name__=="__main__":
