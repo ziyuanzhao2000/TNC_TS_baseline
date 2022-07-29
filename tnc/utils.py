@@ -13,6 +13,7 @@ import torch
 from sklearn.manifold import TSNE
 from sklearn.decomposition import PCA
 from sklearn.neighbors import KNeighborsClassifier
+from sklearn.model_selection import train_test_split
 
 
 def create_simulated_dataset(window_size=50, path='./data/simulated_data/', batch_size=100):
@@ -26,8 +27,10 @@ def create_simulated_dataset(window_size=50, path='./data/simulated_data/', batc
     n_train = int(0.8*len(x))
     n_valid = len(x) - n_train
     n_test = len(x_test)
-    x_train, y_train = x[:n_train], y[:n_train]
-    x_valid, y_valid = x[n_train:], y[n_train:]
+    # should shuffle up dataset! Use sklearn function for this
+    x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2, random_state=42)
+#     x_train, y_train = x[:n_train], y[:n_train]
+#     x_valid, y_valid = x[n_train:], y[n_train:]
 
     datasets = []
     for set in [(x_train, y_train, n_train), (x_test, y_test, n_test), (x_valid, y_valid, n_valid)]:

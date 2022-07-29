@@ -31,7 +31,7 @@ class ClassificationPerformanceExperiment():
 
         data_path = './data/HAR_data/' if 'har' in path else './data/simulated_data/'
         self.train_loader, self.valid_loader, self.test_loader = create_simulated_dataset\
-            (window_size=window_size, path=data_path, batch_size=100)
+            (window_size=window_size, path=data_path, batch_size=100) # reduce batch size??
 
     def _train_end_to_end(self, lr):
         self.e2e_model.train()
