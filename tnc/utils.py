@@ -28,7 +28,7 @@ def create_simulated_dataset(window_size=50, path='./data/simulated_data/', batc
     n_valid = len(x) - n_train
     n_test = len(x_test)
     # should shuffle up dataset! Use sklearn function for this
-    x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2, random_state=42)
+    x_train, x_valid, y_train, y_valid = train_test_split(x, y, test_size=0.2, random_state=42)
 #     x_train, y_train = x[:n_train], y[:n_train]
 #     x_valid, y_valid = x[n_train:], y[n_train:]
 
