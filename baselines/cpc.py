@@ -73,7 +73,7 @@ def learn_encoder(x, window_size, lr=0.001, decay=0, n_size=5, n_epochs=50, data
             encoder = RnnEncoder(hidden_size=100, in_channel=3, encoding_size=10, device=device)
         elif 'har' in data:
             encoding_size = 10
-            encoder = RnnEncoder(hidden_size=100, in_channel=561, encoding_size=10, device=device)
+            encoder = RnnEncoder(hidden_size=100, in_channel=3, encoding_size=10, device=device)
         ds_estimator = torch.nn.Linear(encoder.encoding_size, encoder.encoding_size)
         auto_regressor = torch.nn.GRU(input_size=encoding_size, hidden_size=encoding_size, batch_first=True)
         params = list(ds_estimator.parameters()) + list(encoder.parameters()) + list(auto_regressor.parameters())
